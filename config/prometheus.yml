@@ -1,0 +1,12 @@
+global:
+  scrape_interval: 15s
+scrape_configs:
+  - job_name: "basket-service"
+    static_configs:
+      - targets: ["node-basket-service-1:50100", "node-basket-service-2:50100", "node-basket-service-3:50100", "node-basket-service-4:50100"]
+  - job_name: "catalog-service"
+    static_configs:
+      - targets: ["node-catalog-service-1:50200", "node-catalog-service-2:50200", "node-catalog-service-3:50200", "node-catalog-service-4:50200"]
+  - job_name: "order-service"
+    static_configs:
+      - targets: ["node-order-service-1:50300", "node-order-service-2:50300"]

@@ -1,0 +1,206 @@
+version: "3.8"
+services:
+  # ----------
+  # Database
+  # ----------
+  postgres:
+    image: postgres:14.5
+    restart: always
+    environment:
+      - POSTGRES_USER=docker
+      - POSTGRES_PASSWORD=docker
+      - POSTGRES_DB=shop-db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./basket-service/resources/db-init.sql:/docker-entrypoint-initdb.d/basket-init.sql
+      - ./catalog-service/resources/db-init.sql:/docker-entrypoint-initdb.d/catalog-init.sql
+      - ./order-service/resources/db-init.sql:/docker-entrypoint-initdb.d/order-init.sql
+    networks:
+      - backend
+
+  # ----------
+  # Logs
+  # ----------
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.4.1
+    restart: always
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false # disables https
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - backend
+
+  kibana:
+    image: 'docker.elastic.co/kibana/kibana:7.17.0'
+    restart: always
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    networks:
+      - backend
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.4.1
+    command: filebeat -e -strict.perms=false
+    restart: always
+    environment:
+      - setup.kibana.host=kibana:5601
+      - output.elasticsearch.hosts=["elasticsearch:9200"]
+    volumes:
+      - ./config/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - ./basket-service/logs:/usr/share/filebeat/basket-logs
+      - ./catalog-service/logs:/usr/share/filebeat/catalog-logs
+      - ./order-service/logs:/usr/share/filebeat/order-logs
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - elasticsearch
+    networks:
+      - backend
+    user: root
+
+  # ----------
+  # Metrics
+  # ----------
+  prometheus:
+    image: prom/prometheus:v2.38.0
+    ports:
+      - "9090:9090"
+      - "9091:9091"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - backend
+
+  grafana:
+    image: grafana/grafana:8.2.6
+    ports:
+      - "3000:3000"
+    networks:
+      - backend
+
+  # ----------
+  # Distributed Tracing
+  # ----------
+  jaeger:
+    image: jaegertracing/all-in-one:1.38.0
+    environment:
+      - COLLECTOR_ZIPKIN_HTTP_PORT=9411
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "6831:6831/udp"
+      - "6832:6832/udp"
+      - "5778:5778"
+      - "16686:16686"
+      - "4317:4317"
+      - "4318:4318"
+      - "14250:14250"
+      - "14268:14268"
+      - "14269:14269"
+      - "9411:9411"
+    networks:
+      - backend
+
+  # ----------
+  # Reverse Proxy
+  # ----------
+  haproxy:
+    image: haproxy:2.6-alpine
+    restart: always
+    depends_on:
+      - basket-service
+      - catalog-service
+      - order-service
+    ports:
+      - "40100:40100"
+      - "40200:40200"
+      - "40300:40300"
+    volumes:
+      - ./config/haproxy.conf:/usr/local/etc/haproxy/haproxy.cfg
+    networks:
+      - backend
+
+  # ----------
+  # Services
+  # ----------
+  basket-service:
+    build:
+      context: ./
+      dockerfile: ./basket-service/Dockerfile
+    restart: always
+    depends_on:
+      - postgres
+      - filebeat
+      - elasticsearch
+      - prometheus
+      - jaeger
+    environment:
+      - DB_HOST=postgres
+      - SERVER_PORT=50100
+      - JAEGER_URL=http://jaeger:4318/v1/traces
+    deploy:
+      mode: replicated
+      replicas: 4
+    volumes:
+      - ./basket-service/logs:/var/www/basket-service/logs
+    networks:
+      - backend
+
+  catalog-service:
+    build:
+      context: ./
+      dockerfile: ./catalog-service/Dockerfile
+    restart: always
+    depends_on:
+      - postgres
+      - filebeat
+      - elasticsearch
+      - prometheus
+      - jaeger
+    environment:
+      - DB_HOST=postgres
+      - SERVER_PORT=50200
+      - JAEGER_URL=http://jaeger:4318/v1/traces
+    deploy:
+      mode: replicated
+      replicas: 4
+    volumes:
+      - ./catalog-service/logs:/var/www/catalog-service/logs
+    networks:
+      - backend
+
+  order-service:
+    build:
+      context: ./
+      dockerfile: ./order-service/Dockerfile
+    restart: always
+    depends_on:
+      - postgres
+      - filebeat
+      - elasticsearch
+      - prometheus
+      - jaeger
+    environment:
+      - DB_HOST=postgres
+      - SERVER_PORT=50300
+      - JAEGER_URL=http://jaeger:4318/v1/traces
+      - BASKET_URL=http://haproxy:40100/basket/
+      - CATALOG_URL=http://haproxy:40200/catalog/
+    deploy:
+      mode: replicated
+      replicas: 2
+    volumes:
+      - ./order-service/logs:/var/www/order-service/logs
+    networks:
+      - backend
+
+networks:
+  backend:
+    name: backend

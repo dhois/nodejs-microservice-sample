@@ -1,0 +1,28 @@
+filebeat.config:
+  modules:
+    path: ${path.config}/modules.d/*.yml
+    reload.enabled: false
+
+filebeat.autodiscover:
+  providers:
+    - type: docker
+      hints.enabled: true
+
+# processors:
+#  - add_cloud_metadata: ~
+
+filebeat.inputs:
+  - type: log
+    enabled: true
+    id: log-file-id
+    json.keys_under_root: true
+    json.add_error_key: true
+    json.overwrite_keys: true
+    json.expand_keys: true
+    paths:
+      - /usr/share/filebeat/basket-logs/*.log
+      - /usr/share/filebeat/catalog-logs/*.log
+      - /usr/share/filebeat/order-logs/*.log
+
+output.elasticsearch:
+  hosts: '${ELASTICSEARCH_HOSTS:elasticsearch:9200}'

@@ -1,0 +1,31 @@
+{
+  "name": "catalog-service",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Dominik Hois",
+  "license": "ISC",
+  "dependencies": {
+    "@godaddy/terminus": "4.11.2",
+    "@opentelemetry/api": "1.2.0",
+    "@opentelemetry/auto-instrumentations-node": "0.32.1",
+    "@opentelemetry/exporter-trace-otlp-http": "0.33.0",
+    "@opentelemetry/instrumentation-express": "0.31.1",
+    "@opentelemetry/instrumentation-http": "0.33.0",
+    "@opentelemetry/instrumentation-pg": "0.31.1",
+    "@opentelemetry/sdk-node": "0.33.0",
+    "axios": "0.27.2",
+    "body-parser": "1.20.0",
+    "core-lib": "file:../core-lib",
+    "express": "4.18.1",
+    "express-prom-bundle": "6.5.0",
+    "opossum": "6.4.0",
+    "opossum-prometheus": "0.3.0",
+    "pg": "8.7.3",
+    "prom-client": "14.1.0",
+    "winston": "3.8.2"
+  }
+}
