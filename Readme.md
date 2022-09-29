@@ -64,7 +64,6 @@ docker compose -p "node" down
 ```
 
 ## Tools
-* **Postgres**: http://localhost:5432
 * **Grafana**: http://localhost:3000
 * **Prometheus**: http://localhost:9090
 * **Jaeger**: http://localhost:16686
