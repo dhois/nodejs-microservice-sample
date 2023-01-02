@@ -13,7 +13,7 @@ module.exports = {
         password: process.env.DB_PASSWORD || 'docker',
         connectionTimeoutMillis: 5000,
         idleTimeoutMillis: 5000,
-        max: 100
+        max: 10
     },
     server: {
         port: serverPort
@@ -33,7 +33,14 @@ module.exports = {
     metrics: {
         includeMethod: true,
         includePath: true,
-        normalizePath: [["/catalog/.*", "/catalog/#catalogUid"]]
+        normalizePath: [["/catalog/.*", "/catalog/#catalogUid"]],
+        promClient: {
+            collectDefaultMetrics: {
+                app: 'shop_app',
+                prefix: 'shop_app_',
+                timeout: 10000
+            }
+        }
     },
     jaegerUrl: process.env.JAEGER_URL || "http://localhost:4318/v1/traces"
 };

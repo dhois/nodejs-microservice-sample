@@ -17,12 +17,12 @@ module.exports = class BaseServer {
         await this.db.init();
         this.app.use(bodyParser.json());
         this.app.use(express_prom_bundle(this.config.metrics));
-        collectDefaultMetrics({
+        /*collectDefaultMetrics({
             app: 'shop_app',
             prefix: 'shop_app_',
             timeout: 10000,
             register
-        });
+        });*/
 
         this.server = http.createServer(this.app);
         createTerminus(this.server, {
