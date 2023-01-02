@@ -1,5 +1,9 @@
 const e = require("express");
+const client = require('prom-client');
 const logger = require('./config.js').logger;
+
+const successfulOrderCounter = new client.Counter({name: 'successful_orders_total', help: 'successful_orders_help'});
+const errorOrderCounter = new client.Counter({name: 'error_orders_total', help: 'error_orders_help'});
 
 const PlacingOrderErrors = {
     shippingAddressRequired: "Shipping address is required",
@@ -51,6 +55,7 @@ module.exports = {
         // check if parameters are valid
         const [paramErrors, validInfo] = await isOrderValid(orderInfo);
         if (!validInfo) {
+            errorOrderCounter.inc();
             return {errors: paramErrors};
         }
 
@@ -62,6 +67,7 @@ module.exports = {
             logger.info(`Read basket items for ${orderInfo.username}: ${JSON.stringify(basketItems)}`)
             if (basketItems.length <= 0) {
                 errors.add(PlacingOrderErrors.emptyBasket);
+                errorOrderCounter.inc();
                 return {errors};
             }
 
@@ -77,6 +83,7 @@ module.exports = {
             logger.info(`AvailableStock reduced for ${orderInfo.username} and ${orderStatus}`)
         } catch (e) {
             errors.add(PlacingOrderErrors.CouldNotConnectToServices);
+            errorOrderCounter.inc();
             return {errors}
         }
 
@@ -84,6 +91,7 @@ module.exports = {
 
         if (!client) {
             errors.add(PlacingOrderErrors.DatabaseConnectionLimitReached);
+            errorOrderCounter.inc();
             return [errors, undefined];
         }
 
@@ -93,9 +101,11 @@ module.exports = {
             let orderId = -1;
             if (orderStatus) {
                 orderId = await saveOrder(db, client, orderInfo, basketItems);
-                logger.info(`Order ${orderId} saved for ${orderInfo.username}`)
+                logger.info(`Order ${orderId} saved for ${orderInfo.username}`);
+                successfulOrderCounter.inc();
             } else {
                 errors.add(PlacingOrderErrors.catalogItemOutOfStock);
+                errorOrderCounter.inc();
             }
 
             await db.endTransaction(client);

@@ -40,9 +40,7 @@ module.exports = class BaseServer {
     }
 
     async onHealthCheck() {
-        return Promise.all([this.db.checkHealth()])
-            .then(() => Promise.resolve())
-            .catch(() => Promise.reject(new Error('Service is not healthy')));
+        return Promise.all([this.db.checkHealth()]);
     }
 
     async onCleanUp() {

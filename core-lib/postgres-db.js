@@ -40,7 +40,6 @@ module.exports = class PostgresDb {
         if (res.rows[0].status === 'ACK') {
             return Promise.resolve();
         }
-        return Promise.reject(new Error('Database is not healthy'));
     }
 
     async query(query, inputs = undefined) {
