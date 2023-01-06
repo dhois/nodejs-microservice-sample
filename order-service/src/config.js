@@ -33,7 +33,14 @@ module.exports = {
     metrics: {
         includeMethod: true,
         includePath: true,
-        normalizePath: [["/order/.*", "/order/#username"]]
+        normalizePath: [["/order/.*", "/order/#username"]],
+        promClient: {
+            collectDefaultMetrics: {
+                app: 'shop_app',
+                prefix: 'shop_app_',
+                timeout: 10000
+            }
+        }
     },
     jaegerUrl: process.env.JAEGER_URL || "http://localhost:4318/v1/traces",
     basketUrl: process.env.BASKET_URL || 'http://localhost:50100/basket/',
@@ -42,12 +49,5 @@ module.exports = {
         timeout: 3000, // If our function takes longer than 3 seconds, trigger a failure
         errorThresholdPercentage: 50, // When 50% of requests fail, trip the circuit
         resetTimeout: 30000, // After 30 seconds, try again.
-        promClient: {
-            collectDefaultMetrics: {
-                app: 'shop_app',
-                prefix: 'shop_app_',
-                timeout: 10000
-            }
-        }
     }
 };
