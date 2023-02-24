@@ -25,3 +25,7 @@ class Server extends BaseServer {
 
 const server = new Server(config);
 server.setup().then(() => server.start());
+
+process.on('uncaughtException', function(err) {
+    console.log('Caught exception: ' + err);
+});

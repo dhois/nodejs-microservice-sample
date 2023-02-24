@@ -7,18 +7,6 @@ module.exports = class PostgresDb {
         this.logger = config.logger;
     }
 
-    // async connect() {
-    //     this.pool.on('connect', (client) => this.logger.info('New Client-Connection to postgres database'));
-    //     this.pool.on('error', (err) => this.logger.error('Could not connect to database, err: ', err));
-
-    //     try {
-    //         this.client = await this.pool.connect();
-    //         this.client.on('error', (err) => this.logger.error('Could not connect to database, err: ', err));
-    //     } catch (error) {
-    //         this.logger.error('Could not connect to database', error);
-    //     }
-    // }
-
     async init() {
         this.pool.on('connect', (client) => this.logger.info('New Client-Connection to postgres database'));
         this.pool.on('error', (err) => this.logger.error('Could not connect to database, err: ', err));
@@ -31,7 +19,6 @@ module.exports = class PostgresDb {
             return client;
         } catch (error) {
             this.logger.error('Could not connect to database', error);
-            throw error;
         }
     }
 
@@ -60,7 +47,11 @@ module.exports = class PostgresDb {
     }
 
     async close() {
-        await this.pool.end();
-        this.logger.info('Database connection ended');
+        try {
+            await this.pool.end();
+            this.logger.info('Database connection ended');
+        } catch (error) {
+            this.logger.error('Error closing connection', error);
+        }
     }
 }

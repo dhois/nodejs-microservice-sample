@@ -7,7 +7,7 @@ const circuitBreaker = new CircuitBreaker(reduceAvailableStockImpl, config.netwo
 async function reduceAvailableStockImpl(catalogItems) {
     return axios({
         method: 'POST',
-        url: config.catalogUrl + 'reduceStock',
+        url: config.catalogUrl + '?op=reduceStock',
         data: catalogItems
     });
 }

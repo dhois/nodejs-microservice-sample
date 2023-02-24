@@ -34,11 +34,11 @@ INSERT INTO CatalogBrand (brand)
 VALUES ('S-Oliver');
 
 INSERT INTO CatalogItem (uid, name, price, "availableStock", "catalogTypeId", "catalogBrandId")
-VALUES ('a82919f1-1aa2-49d1-b3fe-4b14daeaa4eb', 'Nike Air Force', 129.99, 10000, 2, 1);
+VALUES ('a82919f1-1aa2-49d1-b3fe-4b14daeaa4eb', 'Nike Air Force', 129.99, 2147483647, 2, 1);
 INSERT INTO CatalogItem (uid, name, price, "availableStock", "catalogTypeId", "catalogBrandId")
-VALUES ('42049faf-8b42-424a-9a2a-ae5d1a288a51', 'Nike Air Max', 110.00, 10000, 2, 1);
+VALUES ('42049faf-8b42-424a-9a2a-ae5d1a288a51', 'Nike Air Max', 110.00, 2147483647, 2, 1);
 INSERT INTO CatalogItem (uid, name, price, "availableStock", "catalogTypeId", "catalogBrandId")
-VALUES ('9d36b0fe-3386-4b68-9356-09c569f7d632', 'S.Oliver Shirt', 15.99, 10000, 1, 2);
+VALUES ('9d36b0fe-3386-4b68-9356-09c569f7d632', 'S.Oliver Shirt', 15.99, 2147483647, 1, 2);
 
 ALTER TABLE CatalogItem
     ADD CONSTRAINT FK_CatalogItem_CatalogType FOREIGN KEY ("catalogTypeId") REFERENCES CatalogType (id);

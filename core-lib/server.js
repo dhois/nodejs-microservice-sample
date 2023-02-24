@@ -40,7 +40,7 @@ module.exports = class BaseServer {
     }
 
     async onHealthCheck() {
-        return Promise.all([this.db.checkHealth()]);
+        return this.db.checkHealth();
     }
 
     async onCleanUp() {

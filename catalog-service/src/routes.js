@@ -19,26 +19,31 @@ routes.get('/catalog/:uid', asyncHandler(async (req, res, next) => {
     }
 }));
 
-routes.post('/catalog/reduceStock', asyncHandler(async (req, res, next) => {
-    try {
-        logger.info(`Incoming request for reduceStock ${JSON.stringify(req.body)}`)
-
-        const result = await reduceAvailableStock(req.app.get('db'), req.body);
-        if (result.has(ReduceAvailableStockErrors.ItemOutOfStock)) {
-            res.status(400).json({error: 'One or more items are out of stock.'});
-        } else {
-            res.json(result);
+routes.post('/catalog', asyncHandler(async (req, res, next) => {
+    if (req.query.op === 'reduceStock') {
+        try {
+            logger.info(`Incoming request for reduceStock ${JSON.stringify(req.body)}`)
+    
+            const result = await reduceAvailableStock(req.app.get('db'), req.body);
+            if (result.has(ReduceAvailableStockErrors.ItemOutOfStock)) {
+                res.status(400).json({error: 'One or more items are out of stock.'});
+            } else {
+                res.json(result);
+            }
             next();
+        } catch (err) {
+            logger.error(err.message);
+    
+            if (err.message === 'sorry, too many clients already')
+                res.status(503).json({error: 'Could not process request due to overload. Please try again later.'});
+            else
+                res.status(500).json({error: 'Something went wrong'});
+    
+            next(err);
         }
-    } catch (err) {
-        logger.error(err.message);
-
-        if (err.message === 'sorry, too many clients already')
-            res.status(503).json({error: 'Could not process request due to overload. Please try again later.'});
-        else
-            res.status(500).json({error: 'Something went wrong'});
-
-        next(err);
+    } else {
+        res.status(501).json({error: 'Wrong operation'});
+        next();
     }
 }));
 

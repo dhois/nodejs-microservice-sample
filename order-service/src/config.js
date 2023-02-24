@@ -44,7 +44,7 @@ module.exports = {
     },
     jaegerUrl: process.env.JAEGER_URL || "http://localhost:4318/v1/traces",
     basketUrl: process.env.BASKET_URL || 'http://localhost:50100/basket/',
-    catalogUrl: process.env.CATALOG_URL || 'http://localhost:50200/catalog/',
+    catalogUrl: process.env.CATALOG_URL || 'http://localhost:50200/catalog',
     networkCircuitBreaker: {
         timeout: 3000, // If our function takes longer than 3 seconds, trigger a failure
         errorThresholdPercentage: 50, // When 50% of requests fail, trip the circuit

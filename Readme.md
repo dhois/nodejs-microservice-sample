@@ -30,7 +30,7 @@ docker compose -p "node" down
 
 * GET http://localhost:40200/catalog/<uuid>
   * example: http://localhost:40200/catalog/a82919f1-1aa2-49d1-b3fe-4b14daeaa4eb
-* POST http://localhost:40200/catalog/reduceStock
+* POST http://localhost:40200/catalog?op=reduceStock
 ```json
 [
   {
