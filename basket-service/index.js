@@ -11,7 +11,6 @@ class Server extends BaseServer {
     async setup() {
         await super.setup();
         this.app.use(routes);
-        // this.fastify.register(routes);
     }
 }
 

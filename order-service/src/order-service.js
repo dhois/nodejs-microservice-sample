@@ -113,7 +113,6 @@ module.exports = {
             return {errors, orderId};
         } catch (error) {
             await db.rollback(client);
-            // await client.release(error);
             logger.error('Error placing Order: ' + error);
         } finally {
             await client.release();

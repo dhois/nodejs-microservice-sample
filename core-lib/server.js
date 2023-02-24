@@ -17,6 +17,8 @@ module.exports = class BaseServer {
         await this.db.init();
         this.app.use(bodyParser.json());
         this.app.use(express_prom_bundle(this.config.metrics));
+
+        // configure only prom-client
         /*collectDefaultMetrics({
             app: 'shop_app',
             prefix: 'shop_app_',
